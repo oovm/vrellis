@@ -1,0 +1,13 @@
+[workspace]
+members = ["projects/*"]
+default-members = [
+    "projects/vrellis-core",
+    "projects/vrellis-web",
+]
+exclude = [
+    "projects/.DS_Store",
+    "projects/vrellis-core-themes",
+]
+
+[profile.release]
+lto = true

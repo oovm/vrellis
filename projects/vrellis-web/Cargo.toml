@@ -1,0 +1,18 @@
+[package]
+name = "mosaic-craft-web"
+publish = false
+version = "1.0.0"
+authors = ["Aster <192607617@qq.com>"]
+description = "..."
+repository = "https://github.com/GalAster/ascii-art"
+readme = "../../readme.md"
+license = "MPL-2.0"
+edition = "2018"
+
+[dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+image = "0.23"
+mosaic-craft-core = {version = "0.1", path = "../vrellis-core" }
+yew = "0.17"
+anyhow = "1.0"
