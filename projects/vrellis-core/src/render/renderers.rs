@@ -1,19 +1,19 @@
-use crate::{MosaicCraft, MosaicCraftCanvas, MosaicCraftCanvasItem, MosaicCraftThemeItem, Result};
+use crate::{Vrellis, VrellisCanvas, MosaicCraftCanvasItem, MosaicCraftThemeItem, Result};
 use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
 use itertools::Itertools;
 use std::{io::Cursor, path::Path, rc::Rc};
 
-impl MosaicCraft {
-    pub fn render_path(&self, path: impl AsRef<Path>) -> Result<MosaicCraftCanvas> {
+impl Vrellis {
+    pub fn render_path(&self, path: impl AsRef<Path>) -> Result<VrellisCanvas> {
         let img = Reader::open(path)?.decode()?;
         Ok(self.render(img))
     }
-    pub fn render_bytes(&self, bytes: &[u8]) -> Result<MosaicCraftCanvas> {
+    pub fn render_bytes(&self, bytes: &[u8]) -> Result<VrellisCanvas> {
         let img = Reader::new(Cursor::new(bytes)).decode()?;
         Ok(self.render(img))
     }
 
-    pub fn render(&self, img: DynamicImage) -> MosaicCraftCanvas {
+    pub fn render(&self, img: DynamicImage) -> VrellisCanvas {
         let mut theme = self.theme.images.iter().map(|e| Rc::new(e.resized_item(self.grid_size))).collect_vec();
         if let Some(c) = self.background {
             let bg = ImageBuffer::from_pixel(self.grid_size, self.grid_size, c);
@@ -27,7 +27,7 @@ impl MosaicCraft {
             let block = MosaicCraftCanvasItem { x1: x, y1: y, data: self.find_nearest_img(&theme, c) };
             data.push(block)
         }
-        return MosaicCraftCanvas { data, size_x: w * self.grid_size, size_y: h * self.grid_size, grid: self.grid_size };
+        return VrellisCanvas { data, size_x: w * self.grid_size, size_y: h * self.grid_size, grid: self.grid_size };
     }
     fn find_nearest_img(&self, theme: &[Rc<MosaicCraftThemeItem>], color: &Rgb<u8>) -> Rc<MosaicCraftThemeItem> {
         unsafe {

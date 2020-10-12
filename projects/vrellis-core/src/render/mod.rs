@@ -4,64 +4,54 @@ use image::{DynamicImage, GenericImageView};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-pub enum ColorAverage {
-    RGBSpace = 0,
+pub enum VrellisShape {
+    Circle = 0,
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum ColorMetrics {
-    /// L1 distance
-    Manhattan = 0,
-    /// L2 distance
-    Euclid = 1,
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+pub struct VrellisPoint {
+    n: u32,
+    x:u32,
+    y:u32,
 }
 
-impl Default for ColorAverage {
+impl Default for VrellisShape {
     fn default() -> Self {
-        Self::RGBSpace
+        Self::Circle
     }
 }
 
-impl Default for ColorMetrics {
+impl Default for VrellisPoint {
     fn default() -> Self {
-        Self::Manhattan
+        Self {
+            n: 0,
+            x: 0,
+            y: 0
+        }
     }
 }
 
-impl ColorAverage {
-    pub fn mean(&self, img: &DynamicImage) -> (f32, f32, f32) {
+
+impl VrellisShape {
+    pub fn sample(&self, num: u32, scale: f32) -> Vec<VrellisPoint> {
+        let mut out = Vec::with_capacity(num as usize);
         match self {
-            ColorAverage::RGBSpace => {
-                let all = img.width() as f32 * img.height() as f32;
-                let (mut r, mut g, mut b) = (0.0, 0.0, 0.0);
-                for c in img.to_rgb().pixels() {
-                    unsafe {
-                        r += *c.0.get_unchecked(0) as f32;
-                        g += *c.0.get_unchecked(1) as f32;
-                        b += *c.0.get_unchecked(2) as f32;
-                    }
+            VrellisShape::Circle => {
+                for n in 0..num {
+                    let x = (scale/2.0) * (n as f32).cos();
+                    let y = (scale/2.0) * (n as f32).sin();
+                    out.push(VrellisPoint {
+                        n,
+                        x: x as u32,
+                        y: y as u32
+                    })
                 }
-                (r / all, g / all, b / all)
+
+
+
             }
         }
+        return out
     }
 }
 
-impl ColorMetrics {
-    pub fn distance(&self, lhs: (f32, f32, f32), rhs: (f32, f32, f32)) -> f32 {
-        match self {
-            ColorMetrics::Manhattan => {
-                let dx = (lhs.0 - rhs.0).abs();
-                let dy = (lhs.1 - rhs.1).abs();
-                let dz = (lhs.2 - rhs.2).abs();
-                dx + dy + dz
-            }
-            ColorMetrics::Euclid => {
-                let dx = (lhs.0 - rhs.0).powf(2.0);
-                let dy = (lhs.1 - rhs.1).powf(2.0);
-                let dz = (lhs.2 - rhs.2).powf(2.0);
-                (dx + dy + dz).sqrt()
-            }
-        }
-    }
-}

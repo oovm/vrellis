@@ -1,7 +1,7 @@
-use crate::MosaicCraftCanvas;
+use crate::VrellisCanvas;
 use image::{DynamicImage, GenericImage};
 
-impl MosaicCraftCanvas {
+impl VrellisCanvas {
     pub fn draw_image(&self) -> DynamicImage {
         let mut canvas = DynamicImage::new_rgb8(self.size_x, self.size_y).to_rgb();
         for item in &self.data {
@@ -13,6 +13,6 @@ impl MosaicCraftCanvas {
     }
 }
 
-impl MosaicCraftCanvas {
+impl VrellisCanvas {
     pub fn draw_canvas(&self) {}
 }
