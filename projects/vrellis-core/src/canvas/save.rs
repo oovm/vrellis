@@ -1,4 +1,4 @@
-use crate::{VrellisCanvas, Result};
+use crate::{Result, VrellisCanvas};
 use image::ImageFormat;
 use std::path::Path;
 

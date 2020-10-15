@@ -1,4 +1,4 @@
-use crate::{Vrellis, VrellisCanvas, MosaicCraftCanvasItem, MosaicCraftThemeItem, Result};
+use crate::{MosaicCraftCanvasItem, MosaicCraftThemeItem, Result, Vrellis, VrellisCanvas};
 use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
 use itertools::Itertools;
 use std::{io::Cursor, path::Path, rc::Rc};
