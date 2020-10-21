@@ -24,15 +24,3 @@ impl From<ImageError> for VrellisError {
         }
     }
 }
-
-impl From<serde_json::Error> for VrellisError {
-    fn from(e: serde_json::Error) -> Self {
-        Self::SerdeError(format!("{}", e))
-    }
-}
-
-impl From<Box<bincode::ErrorKind>> for VrellisError {
-    fn from(e: Box<bincode::ErrorKind>) -> Self {
-        Self::SerdeError(format!("{}", e))
-    }
-}

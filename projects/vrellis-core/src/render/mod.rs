@@ -1,6 +1,3 @@
-mod renderers;
-
-use image::{DynamicImage, GenericImageView};
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
@@ -69,8 +66,8 @@ impl VrellisShape {
                 unimplemented!()
             }
             VrellisShape::Square => {
-                let poly = Self::Polygon { corners: vec![(0, 0), (0, w), (w, h), (h, 0)] };
-                poly.sample(num, width, height)
+                let poly = Self::Polygon { corners: vec![(0, 0), (0, width), (width, height), (height, 0)] };
+                return poly.sample(num, width, height);
             }
             VrellisShape::Polygon { corners } => {
                 // FIXME: better way to get shift pair
@@ -80,31 +77,17 @@ impl VrellisShape {
 
                 let mut circumference = 0.0;
                 let mut temp_line = vec![];
-                for (a,b) in corners.iter().zip(shifted.iter()) {
-                    let c = (a.0 - b.0).powf(2) + (a.1 - b.1).powf(2);
+                for (a, b) in corners.iter().zip(shifted.iter()) {
+                    let c = (a.0 - b.0).pow(2) + (a.1 - b.1).pow(2);
                     let z = (c as f32).sqrt();
                     let p1 = circumference;
-                    circumference +=  z;
+                    circumference += z;
                     let p2 = circumference;
-                    temp_line.push(VrellisLine {
-                        p1,
-                        p2,
-                        x1: a.0,
-                        y1: a.1,
-                        x2: b.0,
-                        y2: b.1,
-                        z
-                    })
-
+                    temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1, z })
                 }
-
-
-                corners
-
-
-            },
+            }
             VrellisShape::Parabola => unimplemented!(),
-            VrellisShape::Custom { points } => points.clone(),
+            VrellisShape::Custom { points } => return points.clone(),
         }
         return out;
     }
@@ -122,19 +105,19 @@ struct VrellisLine {
 
 impl VrellisLine {
     fn cos(&self) -> f32 {
-        (self.x1 - self.x2).abs() as f32 / self.z
+        (self.x1 as f32 - self.x2 as f32).abs() / self.z
     }
     fn sin(&self) -> f32 {
-        (self.y1 - self.y2).abs() as f32 / self.z
+        (self.y1 as f32 - self.y2 as f32).abs() / self.z
     }
     fn rescale_p(&self, p: f32) -> f32 {
         (p - self.p1) / (self.p2 - self.p1)
     }
     fn percent_x(&self, p: f32) -> f32 {
-        self.x1 + self.rescale_p(p) * self.cos()
+        self.x1 as f32 + self.rescale_p(p) * self.cos()
     }
     fn percent_y(&self, p: f32) -> f32 {
-        self.y1 + self.rescale_p(p) * self.sin()
+        self.y1 as f32 + self.rescale_p(p) * self.sin()
     }
     fn line_percent_position(&self, p: f32) -> (u32, u32) {
         (self.percent_x(p).round() as u32, self.percent_y(p).round() as u32)
