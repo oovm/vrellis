@@ -51,7 +51,7 @@ impl Default for VrellisColorMode {
 
 impl VrellisShape {
     pub fn sample(&self, num: u32, width: u32, height: u32) -> Vec<VrellisPoint> {
-        assert!(num > 9, "too less samples!");
+        assert!(num > 7, "too less samples!");
         let mut out = Vec::with_capacity(num as usize);
         match self {
             VrellisShape::Circle => {
@@ -66,24 +66,44 @@ impl VrellisShape {
                 unimplemented!()
             }
             VrellisShape::Square => {
-                let poly = Self::Polygon { corners: vec![(0, 0), (0, width), (width, height), (height, 0)] };
-                return poly.sample(num, width, height);
+                let poly = Self::Polygon { corners: vec![(0, 0), (width, 0), (width, height), (0,height)] };
+                return poly.sample(num, 1, 1);
             }
             VrellisShape::Polygon { corners } => {
                 // FIXME: better way to get shift pair
                 let mut shifted = VecDeque::from(corners.clone());
                 let head = shifted.pop_front().unwrap();
                 shifted.push_back(head);
-
+                // build edges
                 let mut circumference = 0.0;
                 let mut temp_line = vec![];
                 for (a, b) in corners.iter().zip(shifted.iter()) {
-                    let c = (a.0 - b.0).pow(2) + (a.1 - b.1).pow(2);
-                    let z = (c as f32).sqrt();
+                    let z = ((a.0 as f32 - b.0 as f32).powf(2.0) + (a.1 as f32 - b.1 as f32).powf(2.0)).sqrt();
                     let p1 = circumference;
                     circumference += z;
                     let p2 = circumference;
-                    temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1, z })
+                    temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1, z });
+                }
+                temp_line.iter_mut().for_each(|e| e.resize(circumference));
+                println!("{:#?}", temp_line);
+                // find points
+                let mut edges = temp_line.into_iter();
+                let mut this_edge = edges.next().unwrap();
+                for n in 0..num {
+                    let percent = n as f32 / num as f32;
+                    while percent > this_edge.p2 {
+                        match edges.next() {
+                            Some(s) => {
+                                this_edge = s;
+                                //break;
+                            }
+                            None => {
+                                return out;
+                            }
+                        }
+                    }
+                    let (x, y) = this_edge.get_percent_position(percent);
+                    out.push(VrellisPoint { n, x: x.round() as u32, y: y.round() as u32 })
                 }
             }
             VrellisShape::Parabola => unimplemented!(),
@@ -93,6 +113,7 @@ impl VrellisShape {
     }
 }
 
+#[derive(Debug)]
 struct VrellisLine {
     p1: f32,
     p2: f32,
@@ -104,6 +125,11 @@ struct VrellisLine {
 }
 
 impl VrellisLine {
+    fn resize(&mut self, c: f32) {
+        self.p1 /= c;
+        self.p2 /= c;
+    }
+
     fn cos(&self) -> f32 {
         (self.x1 as f32 - self.x2 as f32).abs() / self.z
     }
@@ -119,7 +145,16 @@ impl VrellisLine {
     fn percent_y(&self, p: f32) -> f32 {
         self.y1 as f32 + self.rescale_p(p) * self.sin()
     }
-    fn line_percent_position(&self, p: f32) -> (u32, u32) {
-        (self.percent_x(p).round() as u32, self.percent_y(p).round() as u32)
+    fn get_percent_position(&self, p: f32) -> (f32, f32) {
+        assert!(self.p1 <= p && p <= self.p2);
+        println!("{} ({}, {})",self.rescale_p(p), self.percent_x(p), self.percent_y(p));
+        (self.percent_x(p), self.percent_y(p))
     }
+}
+
+
+#[test]
+fn test() {
+    let s = VrellisShape::Square;
+    println!("{:#?}", s.sample(8, 100,100) )
 }
