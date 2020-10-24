@@ -2,9 +2,8 @@ mod errors;
 mod render;
 pub use crate::{
     errors::{Result, VrellisError},
-    render::{VrellisColorMode, VrellisShape},
+    render::{VrellisColorMode, VrellisPoint, VrellisShape},
 };
-
 pub use image::{Luma, Rgb};
 
 pub const MOSAIC_CRAFT_MAX_BLOCK_SIZE: u32 = 1024;

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
+use std::{collections::VecDeque, f32::consts::PI};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum VrellisShape {
@@ -17,11 +17,11 @@ pub enum VrellisShape {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct VrellisPoint {
-    n: u32,
-    x: u32,
-    y: u32,
+    pub n: u32,
+    pub x: u32,
+    pub y: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -56,9 +56,13 @@ impl VrellisShape {
         match self {
             VrellisShape::Circle => {
                 for n in 0..num {
-                    let x = 1.0 + (n as f32).cos();
-                    let y = 1.0 + (n as f32).sin();
-                    out.push(VrellisPoint { n, x: (x * width as f32).round() as u32, y: (y * height as f32).round() as u32 })
+                    let x = 1.0 + (-2.0 * n as f32 * PI / num as f32).cos();
+                    let y = 1.0 + (-2.0 * n as f32 * PI / num as f32).sin();
+                    out.push(VrellisPoint {
+                        n,
+                        x: (x * width as f32 / 2.0).round() as u32,
+                        y: (y * height as f32 / 2.0).round() as u32,
+                    })
                 }
             }
             VrellisShape::Triangle => {
@@ -66,7 +70,7 @@ impl VrellisShape {
                 unimplemented!()
             }
             VrellisShape::Square => {
-                let poly = Self::Polygon { corners: vec![(0, 0), (width, 0), (width, height), (0,height)] };
+                let poly = Self::Polygon { corners: vec![(0, 0), (width, 0), (width, height), (0, height)] };
                 return poly.sample(num, 1, 1);
             }
             VrellisShape::Polygon { corners } => {
@@ -85,7 +89,6 @@ impl VrellisShape {
                     temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1, z });
                 }
                 temp_line.iter_mut().for_each(|e| e.resize(circumference));
-                println!("{:#?}", temp_line);
                 // find points
                 let mut edges = temp_line.into_iter();
                 let mut this_edge = edges.next().unwrap();
@@ -95,7 +98,6 @@ impl VrellisShape {
                         match edges.next() {
                             Some(s) => {
                                 this_edge = s;
-                                //break;
                             }
                             None => {
                                 return out;
@@ -129,32 +131,17 @@ impl VrellisLine {
         self.p1 /= c;
         self.p2 /= c;
     }
-
-    fn cos(&self) -> f32 {
-        (self.x1 as f32 - self.x2 as f32).abs() / self.z
-    }
-    fn sin(&self) -> f32 {
-        (self.y1 as f32 - self.y2 as f32).abs() / self.z
-    }
     fn rescale_p(&self, p: f32) -> f32 {
         (p - self.p1) / (self.p2 - self.p1)
     }
     fn percent_x(&self, p: f32) -> f32 {
-        self.x1 as f32 + self.rescale_p(p) * self.cos()
+        self.x1 as f32 + self.rescale_p(p) * (self.x2 as f32 - self.x1 as f32)
     }
     fn percent_y(&self, p: f32) -> f32 {
-        self.y1 as f32 + self.rescale_p(p) * self.sin()
+        self.y1 as f32 + self.rescale_p(p) * (self.y2 as f32 - self.y1 as f32)
     }
     fn get_percent_position(&self, p: f32) -> (f32, f32) {
         assert!(self.p1 <= p && p <= self.p2);
-        println!("{} ({}, {})",self.rescale_p(p), self.percent_x(p), self.percent_y(p));
         (self.percent_x(p), self.percent_y(p))
     }
-}
-
-
-#[test]
-fn test() {
-    let s = VrellisShape::Square;
-    println!("{:#?}", s.sample(8, 100,100) )
 }
