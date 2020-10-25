@@ -1,21 +1,31 @@
 mod draw;
 mod save;
 
-use crate::MosaicCraftThemeItem;
+use image::{DynamicImage, GenericImageView};
+use std::{
+    collections::HashSet,
+    fmt::{self, Debug, Formatter},
+    rc::Rc,
+};
 
-use std::rc::Rc;
-
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct VrellisCanvas {
-    pub data: Vec<MosaicCraftCanvasItem>,
     pub size_x: u32,
     pub size_y: u32,
-    pub grid: u32,
+    pub target_image: DynamicImage,
+    pub image_state: DynamicImage,
+    pub state: u32,
+    pub path: Vec<u32>,
+    pub path_banned: HashSet<(u32, u32)>,
 }
 
-#[derive(Debug, Clone)]
-pub struct MosaicCraftCanvasItem {
-    pub x1: u32,
-    pub y1: u32,
-    pub data: Rc<MosaicCraftThemeItem>,
+impl Debug for VrellisCanvas {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        f.debug_struct("VrellisCanvas")
+            .field("target_image", &self.target_image.dimensions())
+            .field("image_state", &self.image_state.dimensions())
+            .field("state", &self.state)
+            .field("path", &self.path)
+            .finish()
+    }
 }

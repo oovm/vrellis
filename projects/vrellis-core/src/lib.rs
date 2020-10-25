@@ -1,6 +1,9 @@
+mod canvas;
 mod errors;
 mod render;
+
 pub use crate::{
+    canvas::VrellisCanvas,
     errors::{Result, VrellisError},
     render::{VrellisColorMode, VrellisPoint, VrellisShape},
 };

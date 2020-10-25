@@ -1,3 +1,4 @@
+mod solver;
 use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, f32::consts::PI};
 
@@ -115,7 +116,6 @@ impl VrellisShape {
     }
 }
 
-#[derive(Debug)]
 struct VrellisLine {
     p1: f32,
     p2: f32,
