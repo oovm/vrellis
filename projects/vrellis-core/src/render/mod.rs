@@ -83,11 +83,10 @@ impl VrellisShape {
                 let mut circumference = 0.0;
                 let mut temp_line = vec![];
                 for (a, b) in corners.iter().zip(shifted.iter()) {
-                    let z = ((a.0 as f32 - b.0 as f32).powf(2.0) + (a.1 as f32 - b.1 as f32).powf(2.0)).sqrt();
                     let p1 = circumference;
-                    circumference += z;
+                    circumference += ((a.0 as f32 - b.0 as f32).powf(2.0) + (a.1 as f32 - b.1 as f32).powf(2.0)).sqrt();
                     let p2 = circumference;
-                    temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1, z });
+                    temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1 });
                 }
                 temp_line.iter_mut().for_each(|e| e.resize(circumference));
                 // find points
@@ -123,7 +122,6 @@ struct VrellisLine {
     y1: u32,
     x2: u32,
     y2: u32,
-    z: f32,
 }
 
 impl VrellisLine {
