@@ -1,7 +1,20 @@
 use crate::{Result, Vrellis, VrellisCanvas};
 use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
-use std::{io::Cursor, path::Path};
-use std::mem::swap;
+use imageproc::drawing::draw_antialiased_line_segment;
+use std::{io::Cursor, mem::swap, path::Path};
+
+pub enum VrellisAlgorithm {
+    /// Not actually render on the original image
+    NonRendered,
+    ActualRendering,
+    AntiAliasedRendering
+}
+
+impl  Default for VrellisAlgorithm {
+    fn default() -> Self {
+        Self::AntiAliasedRendering
+    }
+}
 
 impl Vrellis {
     pub fn render_path(&self, path: impl AsRef<Path>) -> Result<VrellisCanvas> {
@@ -19,7 +32,7 @@ impl Vrellis {
             target_image: img.clone(),
             image_state: img.clone(),
             path: vec![],
-            path_banned: Default::default()
+            path_banned: Default::default(),
         };
         unimplemented!()
     }
@@ -28,18 +41,17 @@ impl Vrellis {
 impl Iterator for VrellisCanvas {
     type Item = DynamicImage;
     fn next(&mut self) -> Option<Self::Item> {
-
-        let mut out = DynamicImage::new_rgb8(100,100);
+        let mut out = DynamicImage::new_rgb8(100, 100);
 
         let new = 2;
 
-
+        draw_antialiased_line_segment;
 
         swap(&mut self.image_state, &mut out);
         let old = *self.path.last().unwrap();
         self.path.push(new);
         self.path_banned.insert((new, old));
         self.path_banned.insert((old, new));
-        return Some(out)
+        return Some(out);
     }
 }

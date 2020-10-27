@@ -5,13 +5,13 @@ use image::{DynamicImage, GenericImageView};
 use std::{
     collections::HashSet,
     fmt::{self, Debug, Formatter},
-
 };
 
 #[derive(Clone)]
 pub struct VrellisCanvas {
     pub size_x: u32,
     pub size_y: u32,
+    pub min_distance: u32,
     pub target_image: DynamicImage,
     pub image_state: DynamicImage,
     pub path: Vec<u32>,

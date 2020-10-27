@@ -1,7 +1,7 @@
 mod solver;
 use serde::{Deserialize, Serialize};
+pub use solver::VrellisAlgorithm;
 use std::{collections::VecDeque, f32::consts::PI};
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum VrellisShape {
     Circle,
