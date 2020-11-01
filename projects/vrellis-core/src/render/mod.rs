@@ -4,6 +4,7 @@ mod solver;
 pub use draw_line::VrellisAlgorithm;
 use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, f32::consts::PI};
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum VrellisShape {
     Circle,
@@ -12,7 +13,7 @@ pub enum VrellisShape {
     Parabola,
     /// Note that it must be a convex hull
     Polygon {
-        corners: Vec<(u32, u32)>,
+        corners: Vec<(f32, f32)>,
     },
     /// Note that it must be a convex curve
     Custom {
@@ -71,12 +72,14 @@ impl VrellisShape {
             }
             VrellisShape::Triangle => {
                 let poly = Self::Polygon {
-                    corners: vec![(width / 2, (3.0.sqrt() / 2.0).round() as u32), (width, height), (0, height)],
+                    corners: vec![(0.5, 3.0_f32.sqrt() / 2.0), (width as f32, height as f32), (0.0, height as f32)],
                 };
                 return poly.sample(num, 1, 1);
             }
             VrellisShape::Square => {
-                let poly = Self::Polygon { corners: vec![(0, 0), (width, 0), (width, height), (0, height)] };
+                let poly = Self::Polygon {
+                    corners: vec![(0.0, 0.0), (width as f32, 0.0), (width as f32, height as f32), (0.0, height as f32)],
+                };
                 return poly.sample(num, 1, 1);
             }
             VrellisShape::Polygon { corners } => {
@@ -89,7 +92,7 @@ impl VrellisShape {
                 let mut temp_line = vec![];
                 for (a, b) in corners.iter().zip(shifted.iter()) {
                     let p1 = circumference;
-                    circumference += ((a.0 as f32 - b.0 as f32).powf(2.0) + (a.1 as f32 - b.1 as f32).powf(2.0)).sqrt();
+                    circumference += ((a.0 - b.0).powf(2.0) + (a.1 - b.1).powf(2.0)).sqrt();
                     let p2 = circumference;
                     temp_line.push(VrellisLine { p1, p2, x1: a.0, y1: a.1, x2: b.0, y2: b.1 });
                 }
@@ -110,7 +113,7 @@ impl VrellisShape {
                         }
                     }
                     let (x, y) = this_edge.get_percent_position(percent);
-                    out.push(VrellisPoint { n, x: x.round() as u32, y: y.round() as u32 })
+                    out.push(VrellisPoint { n, x: (x * width as f32).round() as u32, y: (y * height as f32).round() as u32 })
                 }
             }
             VrellisShape::Parabola => unimplemented!(),
@@ -123,10 +126,10 @@ impl VrellisShape {
 struct VrellisLine {
     p1: f32,
     p2: f32,
-    x1: u32,
-    y1: u32,
-    x2: u32,
-    y2: u32,
+    x1: f32,
+    y1: f32,
+    x2: f32,
+    y2: f32,
 }
 
 impl VrellisLine {
@@ -138,10 +141,10 @@ impl VrellisLine {
         (p - self.p1) / (self.p2 - self.p1)
     }
     fn percent_x(&self, p: f32) -> f32 {
-        self.x1 as f32 + self.rescale_p(p) * (self.x2 as f32 - self.x1 as f32)
+        self.x1 + self.rescale_p(p) * (self.x2 - self.x1)
     }
     fn percent_y(&self, p: f32) -> f32 {
-        self.y1 as f32 + self.rescale_p(p) * (self.y2 as f32 - self.y1 as f32)
+        self.y1 + self.rescale_p(p) * (self.y2 - self.y1)
     }
     fn get_percent_position(&self, p: f32) -> (f32, f32) {
         assert!(self.p1 <= p && p <= self.p2);

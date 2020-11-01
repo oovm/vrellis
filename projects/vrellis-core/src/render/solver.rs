@@ -18,7 +18,9 @@ impl Vrellis {
             size_y: img.height(),
             min_distance: 0,
             target_image: img.clone(),
-            image_state: img.clone(),
+            current_image: img.clone(),
+            current_composite_image: img.clone().to_luma(),
+            points: vec![],
             path: vec![],
             path_banned: Default::default(),
         };
@@ -33,7 +35,7 @@ impl Iterator for VrellisCanvas {
 
         let new = 2;
 
-        swap(&mut self.image_state, &mut out);
+        swap(&mut self.current_image, &mut out);
         let old = *self.path.last().unwrap();
         self.path.push(new);
         self.path_banned.insert((new, old));
