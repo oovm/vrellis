@@ -26,7 +26,8 @@ pub struct Vrellis {
     /// If the ordinal difference of two points is less than or equal to this value
     /// Then there will be no connection between the two
     pub min_distance: u32,
-    pub line_width:f32,
+    /// The basic width of the line when drawing
+    pub line_width: f32,
     /// Whether to use highlight color to highlight the last step
     pub highlight_last_step: Option<Rgb<u8>>,
 }
@@ -40,7 +41,7 @@ impl Default for Vrellis {
             inverted_color: false,
             min_distance: 0,
             line_width: 1.0,
-            highlight_last_step: None
+            highlight_last_step: None,
         }
     }
 }

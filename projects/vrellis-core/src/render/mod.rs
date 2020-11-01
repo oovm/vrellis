@@ -1,6 +1,8 @@
+mod draw_line;
 mod solver;
+
+pub use draw_line::VrellisAlgorithm;
 use serde::{Deserialize, Serialize};
-pub use solver::VrellisAlgorithm;
 use std::{collections::VecDeque, f32::consts::PI};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum VrellisShape {
@@ -57,8 +59,9 @@ impl VrellisShape {
         match self {
             VrellisShape::Circle => {
                 for n in 0..num {
-                    let x = 1.0 + (-2.0 * n as f32 * PI / num as f32).cos();
-                    let y = 1.0 + (-2.0 * n as f32 * PI / num as f32).sin();
+                    // 奇变偶不变, 符号看象限
+                    let x = 1.0 + (2.0 * PI * n as f32 / num as f32).cos();
+                    let y = 1.0 - (2.0 * PI * n as f32 / num as f32).sin();
                     out.push(VrellisPoint {
                         n,
                         x: (x * width as f32 / 2.0).round() as u32,
@@ -67,8 +70,10 @@ impl VrellisShape {
                 }
             }
             VrellisShape::Triangle => {
-                assert_eq!(num % 3, 0, "Must be a multiple of 3");
-                unimplemented!()
+                let poly = Self::Polygon {
+                    corners: vec![(width / 2, (3.0.sqrt() / 2.0).round() as u32), (width, height), (0, height)],
+                };
+                return poly.sample(num, 1, 1);
             }
             VrellisShape::Square => {
                 let poly = Self::Polygon { corners: vec![(0, 0), (width, 0), (width, height), (0, height)] };

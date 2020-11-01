@@ -3,19 +3,6 @@ use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
 use imageproc::drawing::draw_antialiased_line_segment;
 use std::{io::Cursor, mem::swap, path::Path};
 
-pub enum VrellisAlgorithm {
-    /// Not actually render on the original image
-    NonRendered,
-    ActualRendering,
-    AntiAliasedRendering
-}
-
-impl  Default for VrellisAlgorithm {
-    fn default() -> Self {
-        Self::AntiAliasedRendering
-    }
-}
-
 impl Vrellis {
     pub fn render_path(&self, path: impl AsRef<Path>) -> Result<VrellisCanvas> {
         let img = Reader::open(path)?.decode()?;
@@ -29,6 +16,7 @@ impl Vrellis {
         VrellisCanvas {
             size_x: img.width(),
             size_y: img.height(),
+            min_distance: 0,
             target_image: img.clone(),
             image_state: img.clone(),
             path: vec![],
@@ -44,8 +32,6 @@ impl Iterator for VrellisCanvas {
         let mut out = DynamicImage::new_rgb8(100, 100);
 
         let new = 2;
-
-        draw_antialiased_line_segment;
 
         swap(&mut self.image_state, &mut out);
         let old = *self.path.last().unwrap();
