@@ -13,17 +13,7 @@ impl Vrellis {
         Ok(self.render(img))
     }
     pub fn render(&self, img: DynamicImage) -> VrellisCanvas {
-        VrellisCanvas {
-            size_x: img.width(),
-            size_y: img.height(),
-            min_distance: 0,
-            target_image: img.clone(),
-            current_image: img.clone(),
-            current_composite_image: img.clone().to_luma(),
-            points: vec![],
-            path: vec![],
-            path_banned: Default::default(),
-        };
+        VrellisCanvas { min_distance: 0, points: vec![], path: vec![], path_banned: Default::default() };
         unimplemented!()
     }
 }
