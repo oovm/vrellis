@@ -1,6 +1,5 @@
 use crate::{Result, Vrellis, VrellisCanvas};
 use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
-use imageproc::drawing::draw_antialiased_line_segment;
 use std::{io::Cursor, mem::swap, path::Path};
 
 impl Vrellis {
@@ -13,8 +12,25 @@ impl Vrellis {
         Ok(self.render(img))
     }
     pub fn render(&self, img: DynamicImage) -> VrellisCanvas {
-        VrellisCanvas { min_distance: 0, points: vec![], path: vec![], path_banned: Default::default() };
-        unimplemented!()
+        let canvas = match self.inverted_color {
+            true => DynamicImage::new_luma_a8(img.width(), img.height()),
+            false => DynamicImage::new_luma_a8(img.width(), img.height()),
+        };
+        let points_sample = self.convex_shape.sample(img.width(), img.height(), self.points);
+        let initial_point = match self.inverted_color {
+            true => points_sample.iter().min_by_key(|p| p.n).unwrap(),
+            false => points_sample.iter().min_by_key(|p| p.n).unwrap(),
+        };
+        VrellisCanvas {
+            algorithm: self.algorithm,
+            min_distance: self.min_distance,
+            target_image: img.to_rgb(),
+            current_image: canvas.to_luma_alpha(),
+            current_composite_image: img.to_luma(),
+            points: points_sample,
+            path: vec![initial_point.n],
+            path_banned: Default::default(),
+        }
     }
 }
 

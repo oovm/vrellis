@@ -9,13 +9,12 @@ pub use crate::{
 };
 pub use image::{Luma, Rgb};
 
-pub const MOSAIC_CRAFT_MAX_BLOCK_SIZE: u32 = 1024;
-pub const MOSAIC_CRAFT_THEME_CONFIG_NAME: &str = "mosaic-craft-theme.json";
-
 #[derive(Debug, Clone)]
 pub struct Vrellis {
     /// The shape of the uniformly distributed point set on the convex hull
     pub convex_shape: VrellisShape,
+    /// number of points
+    pub points: u32,
     /// Color rendering mode, not all drawing modes are supported
     pub color_mode: VrellisColorMode,
     /// Algorithm to use when evaluating the next step
@@ -39,6 +38,7 @@ impl Default for Vrellis {
             color_mode: Default::default(),
             algorithm: Default::default(),
             inverted_color: false,
+            points: 100,
             min_distance: 0,
             line_width: 1.0,
             highlight_last_step: None,

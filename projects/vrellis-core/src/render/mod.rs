@@ -73,15 +73,11 @@ impl VrellisShape {
                 }
             }
             VrellisShape::Triangle => {
-                let poly = Self::Polygon {
-                    corners: vec![(0.5, 3.0_f32.sqrt() / 2.0), (width as f32, height as f32), (0.0, height as f32)],
-                };
+                let poly = Self::Polygon { corners: vec![(0.5, 3.0_f32.sqrt() / 2.0), (1.0, 1.0), (0.0, 1.0)] };
                 return poly.sample(num, 1, 1);
             }
             VrellisShape::Square => {
-                let poly = Self::Polygon {
-                    corners: vec![(0.0, 0.0), (width as f32, 0.0), (width as f32, height as f32), (0.0, height as f32)],
-                };
+                let poly = Self::Polygon { corners: vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)] };
                 return poly.sample(num, 1, 1);
             }
             VrellisShape::Polygon { corners } => {

@@ -2,7 +2,7 @@ use image::{GrayAlphaImage, GrayImage, Luma, LumaA};
 use imageproc::drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, BresenhamLinePixelIter};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum VrellisAlgorithm {
     /// Not actually render on the original image
     NonRendered,
@@ -23,7 +23,7 @@ impl VrellisAlgorithm {
         let line = BresenhamLinePixelIter::<Luma<u8>>::new(img, (p1.0 as f32, p1.1 as f32), (p2.0 as f32, p2.1 as f32));
         let mut sum = 0.0;
         for p in line {
-            unsafe { sum += p.0.get_unchecked(0) as f32 }
+            unsafe { sum += *p.0.get_unchecked(0) as f32 }
         }
         return sum;
     }
@@ -42,9 +42,11 @@ impl VrellisAlgorithm {
                 (p1.0 as i32, p1.1 as i32),
                 (p2.0 as i32, p2.1 as i32),
                 pixel,
-                |a, b, c| {
-                    let mix = c * (b as f32 - a as f32);
-                    Luma([a + mix.round() as u8])
+                |a, b, c| unsafe {
+                    let a = *a.0.get_unchecked(0) as f32;
+                    let b = *b.0.get_unchecked(0) as f32;
+                    let mix = a + c * (b - a);
+                    Luma([mix.round() as u8])
                 },
             ),
         }

@@ -23,7 +23,7 @@ impl VrellisCanvas {
 }
 
 impl VrellisCanvas {
-    pub fn save_sequence(&self, path: impl AsRef<Path>) -> Result<()> {
-        Ok(fs::write(path, self.draw_sequence().as_bytes())?)
+    pub fn save_sequence(&self, _: impl AsRef<Path>) -> Result<()> {
+        unimplemented!()
     }
 }

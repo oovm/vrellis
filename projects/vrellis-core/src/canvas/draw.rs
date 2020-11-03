@@ -1,9 +1,10 @@
-use crate::VrellisCanvas;
-use image::{DynamicImage, GenericImage};
+use crate::{render::VrellisSequence, VrellisCanvas};
+use image::DynamicImage;
 
 impl VrellisCanvas {
-    pub fn draw_sequence(&self) -> String {
-        format!("{:#?}", self.path)
+    pub fn draw_sequence(&self, s: &VrellisSequence) -> String {
+        format!("{:#?}", s);
+        unimplemented!()
     }
 }
 
@@ -15,10 +16,12 @@ impl VrellisCanvas {
 
 impl VrellisCanvas {
     pub fn draw_image(&self) -> DynamicImage {
-        unimplemented!()
+        DynamicImage::ImageLumaA8(self.current_image.clone())
     }
 }
 
 impl VrellisCanvas {
-    pub fn draw_canvas(&self) {}
+    pub fn draw_canvas(&self) {
+        unimplemented!()
+    }
 }

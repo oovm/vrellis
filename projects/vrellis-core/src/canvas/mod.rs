@@ -1,7 +1,7 @@
 mod draw;
 mod save;
 
-use crate::VrellisPoint;
+use crate::{VrellisAlgorithm, VrellisPoint};
 use image::{GenericImageView, GrayAlphaImage, GrayImage, RgbImage, RgbaImage};
 use std::{
     collections::HashSet,
@@ -10,6 +10,7 @@ use std::{
 
 #[derive(Clone)]
 pub struct VrellisCanvas {
+    pub algorithm: VrellisAlgorithm,
     pub min_distance: u32,
     pub target_image: RgbImage,
     pub current_image: GrayAlphaImage,
