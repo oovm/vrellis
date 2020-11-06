@@ -38,14 +38,48 @@ impl Iterator for VrellisCanvas {
     type Item = DynamicImage;
     fn next(&mut self) -> Option<Self::Item> {
         let mut out = DynamicImage::new_rgb8(100, 100);
+        let old = *self.path.last().unwrap();
 
-        let new = 2;
+        let mut selected = 0;
+        for new in 0..self.points.len() {
+            if !self.should_skip(new) {
+                unsafe {
+                     let this_line = self.points.get_unchecked(new)
+                };
+
+
+                self.algorithm.line_score(self)
+            }
+        }
+        // No legal line segment, no line is selected
+        if selected == 0 {
+            return None
+        }
 
         swap(&mut self.current_image, &mut out);
-        let old = *self.path.last().unwrap();
-        self.path.push(new);
-        self.path_banned.insert((new, old));
-        self.path_banned.insert((old, new));
+
+        self.path.push(selected);
+        self.path_banned.insert((selected, old));
+        self.path_banned.insert((old, selected));
         return Some(out);
+    }
+}
+
+impl VrellisCanvas {
+    fn should_skip(&self, this: usize) -> bool {
+        let old = *self.path.last().unwrap();
+        let this = this as u32;
+        if old == this {
+            true
+        }
+        else if old - this <= self.min_distance {
+            true
+        }
+        else if self.path_banned.contains(&(old, this)) {
+            true
+        }
+        else {
+            false
+        }
     }
 }
