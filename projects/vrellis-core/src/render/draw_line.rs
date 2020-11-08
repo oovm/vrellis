@@ -1,3 +1,4 @@
+use crate::VrellisCanvas;
 use image::{GrayAlphaImage, GrayImage, Luma, LumaA};
 use imageproc::drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, BresenhamLinePixelIter};
 use serde::{Deserialize, Serialize};
@@ -19,24 +20,26 @@ impl Default for VrellisAlgorithm {
 }
 
 impl VrellisAlgorithm {
-    pub fn line_score(&self, img: &GrayImage, p1: (u32, u32), p2: (u32, u32)) -> f32 {
-        let line = BresenhamLinePixelIter::<Luma<u8>>::new(img, (p1.0 as f32, p1.1 as f32), (p2.0 as f32, p2.1 as f32));
+    pub fn line_score(&self, img: &GrayImage, x1: u32, x2: u32, y1: u32, y2: u32, reversed: bool) -> f32 {
+        let line = BresenhamLinePixelIter::<Luma<u8>>::new(img, (x1 as f32, x2 as f32), (y1 as f32, y2 as f32));
         let mut sum = 0.0;
         for p in line {
-            unsafe { sum += *p.0.get_unchecked(0) as f32 }
+            let s = unsafe { *p.0.get_unchecked(0) };
+            sum += match reversed {
+                true => s as f32,
+                false => (255 - s) as f32,
+            }
         }
         return sum;
     }
-    pub fn draw_line(&self, img: &mut GrayImage, p1: (u32, u32), p2: (u32, u32), reversed: bool) {
+    pub fn draw_line(&self, img: &mut GrayImage, x1: u32, x2: u32, y1: u32, y2: u32, reversed: bool) {
         let pixel = match reversed {
             true => Luma([0]),
             false => Luma([255]),
         };
         match self {
             VrellisAlgorithm::NonRendered => (),
-            VrellisAlgorithm::ThinLine => {
-                draw_line_segment_mut(img, (p1.0 as f32, p1.1 as f32), (p2.0 as f32, p2.1 as f32), pixel)
-            }
+            VrellisAlgorithm::ThinLine => draw_line_segment_mut(img, (x1 as f32, x2 as f32), (y1 as f32, y2 as f32), pixel),
             VrellisAlgorithm::AntiAliased => draw_antialiased_line_segment_mut(
                 img,
                 (p1.0 as i32, p1.1 as i32),
@@ -50,5 +53,19 @@ impl VrellisAlgorithm {
                 },
             ),
         }
+    }
+}
+
+impl VrellisCanvas {
+    pub(in crate::render) fn draw_canvas_line(
+        &self,
+        img: &mut GrayAlphaImage,
+        x1: u32,
+        x2: u32,
+        y1: u32,
+        y2: u32,
+        reversed: bool,
+    ) {
+        unimplemented!()
     }
 }

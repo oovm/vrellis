@@ -1,5 +1,5 @@
-use crate::{Result, Vrellis, VrellisCanvas};
-use image::{io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgb};
+use crate::{Result, Vrellis, VrellisCanvas, VrellisPoint};
+use image::{io::Reader, DynamicImage, GenericImageView, GrayAlphaImage, ImageBuffer, Rgb};
 use std::{io::Cursor, mem::swap, path::Path};
 
 impl Vrellis {
@@ -24,12 +24,14 @@ impl Vrellis {
         VrellisCanvas {
             algorithm: self.algorithm,
             min_distance: self.min_distance,
+            inverted_color: self.inverted_color,
             target_image: img.to_rgb(),
             current_image: canvas.to_luma_alpha(),
             current_composite_image: img.to_luma(),
             points: points_sample,
             path: vec![initial_point.n],
             path_banned: Default::default(),
+            last_point: initial_point.clone(),
         }
     }
 }
@@ -38,37 +40,52 @@ impl Iterator for VrellisCanvas {
     type Item = DynamicImage;
     fn next(&mut self) -> Option<Self::Item> {
         let mut out = DynamicImage::new_rgb8(100, 100);
-        let old = *self.path.last().unwrap();
-
-        let mut selected = 0;
-        for new in 0..self.points.len() {
-            if !self.should_skip(new) {
-                unsafe {
-                     let this_line = self.points.get_unchecked(new)
-                };
-
-
-                self.algorithm.line_score(self)
+        let mut selected = None;
+        let mut max_score = 0.0;
+        for new in self.points.iter() {
+            if self.should_skip(new) {
+                continue;
+            }
+            let score = self.algorithm.line_score(
+                &self.current_composite_image,
+                self.last_point.x,
+                self.last_point.y,
+                new.x,
+                new.y,
+                self.inverted_color,
+            );
+            if score > max_score {
+                max_score = score;
+                selected = Some(new)
             }
         }
         // No legal line segment, no line is selected
-        if selected == 0 {
-            return None
-        }
-
-        swap(&mut self.current_image, &mut out);
-
-        self.path.push(selected);
-        self.path_banned.insert((selected, old));
-        self.path_banned.insert((old, selected));
-        return Some(out);
+        if let None = selected {
+            return None;
+        };
+        let selected = selected.unwrap();
+        self.algorithm.draw_line(
+            &mut self.current_composite_image,
+            self.last_point.x,
+            self.last_point.y,
+            new.x,
+            new.y,
+            self.inverted_color,
+        );
+        self.draw_canvas_line(&mut self.current_image, self.last_point.x, self.last_point.y, new.x, new.y, self.inverted_color);
+        let new = selected.unwrap().n;
+        let old = *self.path.last().unwrap();
+        self.path.push(new);
+        self.path_banned.insert((new, old));
+        self.path_banned.insert((old, new));
+        return Some(DynamicImage::ImageLumaA8(self.current_image.clone()));
     }
 }
 
 impl VrellisCanvas {
-    fn should_skip(&self, this: usize) -> bool {
+    fn should_skip(&self, this: &VrellisPoint) -> bool {
         let old = *self.path.last().unwrap();
-        let this = this as u32;
+        let this = this.n;
         if old == this {
             true
         }

@@ -12,12 +12,14 @@ use std::{
 pub struct VrellisCanvas {
     pub algorithm: VrellisAlgorithm,
     pub min_distance: u32,
+    pub inverted_color: bool,
     pub target_image: RgbImage,
     pub current_image: GrayAlphaImage,
     pub current_composite_image: GrayImage,
     pub points: Vec<VrellisPoint>,
     pub path: Vec<u32>,
     pub path_banned: HashSet<(u32, u32)>,
+    pub last_point: VrellisPoint,
 }
 
 impl Debug for VrellisCanvas {
