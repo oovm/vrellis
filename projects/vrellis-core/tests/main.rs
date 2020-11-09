@@ -1,3 +1,4 @@
+mod draw_image;
 mod samples;
 
 #[test]

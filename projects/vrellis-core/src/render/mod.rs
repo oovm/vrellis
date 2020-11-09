@@ -74,11 +74,11 @@ impl VrellisShape {
             }
             VrellisShape::Triangle => {
                 let poly = Self::Polygon { corners: vec![(0.5, 3.0_f32.sqrt() / 2.0), (1.0, 1.0), (0.0, 1.0)] };
-                return poly.sample(num, 1, 1);
+                return poly.sample(num, width, height);
             }
             VrellisShape::Square => {
                 let poly = Self::Polygon { corners: vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)] };
-                return poly.sample(num, 1, 1);
+                return poly.sample(num, width, height);
             }
             VrellisShape::Polygon { corners } => {
                 // FIXME: better way to get shift pair

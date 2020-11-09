@@ -1,4 +1,4 @@
-use crate::{render::VrellisSequence, VrellisCanvas};
+use crate::VrellisCanvas;
 use image::DynamicImage;
 
 impl VrellisCanvas {

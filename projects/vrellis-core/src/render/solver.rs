@@ -1,6 +1,6 @@
 use crate::{Result, Vrellis, VrellisCanvas, VrellisPoint};
-use image::{io::Reader, DynamicImage, GenericImageView, GrayAlphaImage, ImageBuffer, Rgb};
-use std::{io::Cursor, mem::swap, path::Path};
+use image::{io::Reader, DynamicImage, GenericImageView};
+use std::{io::Cursor, path::Path};
 
 impl Vrellis {
     pub fn render_path(&self, path: impl AsRef<Path>) -> Result<VrellisCanvas> {
@@ -16,7 +16,7 @@ impl Vrellis {
             true => DynamicImage::new_luma_a8(img.width(), img.height()),
             false => DynamicImage::new_luma_a8(img.width(), img.height()),
         };
-        let points_sample = self.convex_shape.sample(img.width(), img.height(), self.points);
+        let points_sample = self.convex_shape.sample(self.points, img.width(), img.height());
         let initial_point = match self.inverted_color {
             true => points_sample.iter().min_by_key(|p| p.n).unwrap(),
             false => points_sample.iter().min_by_key(|p| p.n).unwrap(),
@@ -28,7 +28,7 @@ impl Vrellis {
             target_image: img.to_rgb(),
             current_image: canvas.to_luma_alpha(),
             current_composite_image: img.to_luma(),
-            points: points_sample,
+            points: points_sample.clone(),
             path: vec![initial_point.n],
             path_banned: Default::default(),
             last_point: initial_point.clone(),
@@ -39,41 +39,40 @@ impl Vrellis {
 impl Iterator for VrellisCanvas {
     type Item = DynamicImage;
     fn next(&mut self) -> Option<Self::Item> {
-        let mut out = DynamicImage::new_rgb8(100, 100);
         let mut selected = None;
         let mut max_score = 0.0;
-        for new in self.points.iter() {
-            if self.should_skip(new) {
+        for point in self.points.iter() {
+            if self.should_skip(point) {
                 continue;
             }
             let score = self.algorithm.line_score(
                 &self.current_composite_image,
                 self.last_point.x,
                 self.last_point.y,
-                new.x,
-                new.y,
+                point.x,
+                point.y,
                 self.inverted_color,
             );
             if score > max_score {
                 max_score = score;
-                selected = Some(new)
+                selected = Some(point)
             }
         }
         // No legal line segment, no line is selected
         if let None = selected {
             return None;
         };
-        let selected = selected.unwrap();
+        let selected = selected.unwrap().clone();
         self.algorithm.draw_line(
             &mut self.current_composite_image,
             self.last_point.x,
             self.last_point.y,
-            new.x,
-            new.y,
+            selected.x,
+            selected.y,
             self.inverted_color,
         );
-        self.draw_canvas_line(&mut self.current_image, self.last_point.x, self.last_point.y, new.x, new.y, self.inverted_color);
-        let new = selected.unwrap().n;
+        self.draw_canvas_line(self.last_point.x, self.last_point.y, selected.x, selected.y, self.inverted_color);
+        let new = selected.n;
         let old = *self.path.last().unwrap();
         self.path.push(new);
         self.path_banned.insert((new, old));
@@ -89,7 +88,7 @@ impl VrellisCanvas {
         if old == this {
             true
         }
-        else if old - this <= self.min_distance {
+        else if old > this && old - this <= self.min_distance {
             true
         }
         else if self.path_banned.contains(&(old, this)) {

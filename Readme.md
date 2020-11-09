@@ -1,7 +1,12 @@
 Ascii Art
 =========
 
-Start from Ascii, beyond Ascii.
+petros vrellis
+
+A new way to knit (2016)
+
+http://artof01.com/vrellis/works/knit.html
+
 
 ## Examples
 

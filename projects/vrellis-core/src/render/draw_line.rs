@@ -1,5 +1,5 @@
 use crate::VrellisCanvas;
-use image::{GrayAlphaImage, GrayImage, Luma, LumaA};
+use image::{GrayImage, Luma, LumaA};
 use imageproc::drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, BresenhamLinePixelIter};
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +26,7 @@ impl VrellisAlgorithm {
         for p in line {
             let s = unsafe { *p.0.get_unchecked(0) };
             sum += match reversed {
-                true => s as f32,
+                true =>  s as f32,
                 false => (255 - s) as f32,
             }
         }
@@ -34,16 +34,16 @@ impl VrellisAlgorithm {
     }
     pub fn draw_line(&self, img: &mut GrayImage, x1: u32, x2: u32, y1: u32, y2: u32, reversed: bool) {
         let pixel = match reversed {
-            true => Luma([0]),
-            false => Luma([255]),
+            true => Luma([255]),
+            false => Luma([0]),
         };
         match self {
             VrellisAlgorithm::NonRendered => (),
             VrellisAlgorithm::ThinLine => draw_line_segment_mut(img, (x1 as f32, x2 as f32), (y1 as f32, y2 as f32), pixel),
             VrellisAlgorithm::AntiAliased => draw_antialiased_line_segment_mut(
                 img,
-                (p1.0 as i32, p1.1 as i32),
-                (p2.0 as i32, p2.1 as i32),
+                (x1 as i32, x2 as i32),
+                (y1 as i32, y2 as i32),
                 pixel,
                 |a, b, c| unsafe {
                     let a = *a.0.get_unchecked(0) as f32;
@@ -57,15 +57,22 @@ impl VrellisAlgorithm {
 }
 
 impl VrellisCanvas {
-    pub(in crate::render) fn draw_canvas_line(
-        &self,
-        img: &mut GrayAlphaImage,
-        x1: u32,
-        x2: u32,
-        y1: u32,
-        y2: u32,
-        reversed: bool,
-    ) {
-        unimplemented!()
+    pub(in crate::render) fn draw_canvas_line(&mut self, x1: u32, x2: u32, y1: u32, y2: u32, reversed: bool) {
+        let pixel = match reversed {
+            true => LumaA([255, 255]),
+            false => LumaA([0, 255]),
+        };
+        draw_antialiased_line_segment_mut(
+            &mut self.current_image,
+            (x1 as i32, x2 as i32),
+            (y1 as i32, y2 as i32),
+            pixel,
+            |a, b, c| unsafe {
+                let a = *a.0.get_unchecked(0) as f32;
+                let b = *b.0.get_unchecked(0) as f32;
+                let mix = a + c * (b - a);
+                LumaA([mix.round() as u8,255])
+            },
+        )
     }
 }

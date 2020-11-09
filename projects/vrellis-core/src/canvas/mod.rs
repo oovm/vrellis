@@ -2,7 +2,7 @@ mod draw;
 mod save;
 
 use crate::{VrellisAlgorithm, VrellisPoint};
-use image::{GenericImageView, GrayAlphaImage, GrayImage, RgbImage, RgbaImage};
+use image::{GrayAlphaImage, GrayImage, RgbImage};
 use std::{
     collections::HashSet,
     fmt::{self, Debug, Formatter},
