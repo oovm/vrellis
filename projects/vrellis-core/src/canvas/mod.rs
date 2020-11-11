@@ -31,3 +31,13 @@ impl Debug for VrellisCanvas {
             .finish()
     }
 }
+
+impl VrellisCanvas {
+    pub fn steps(&mut self, n: u32) {
+        for _ in 0..n {
+            if let None = self.next() {
+                break;
+            }
+        }
+    }
+}

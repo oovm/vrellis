@@ -72,6 +72,7 @@ impl Iterator for VrellisCanvas {
             self.inverted_color,
         );
         self.draw_canvas_line(self.last_point.x, self.last_point.y, selected.x, selected.y, self.inverted_color);
+        self.last_point = selected;
         let new = selected.n;
         let old = *self.path.last().unwrap();
         self.path.push(new);
@@ -83,7 +84,10 @@ impl Iterator for VrellisCanvas {
 
 impl VrellisCanvas {
     fn should_skip(&self, this: &VrellisPoint) -> bool {
-        let old = *self.path.last().unwrap();
+        if self.last_point.x == this.x || self.last_point.y == this.y {
+            return true;
+        }
+        let old = self.last_point.n;
         let this = this.n;
         if old == this {
             true
