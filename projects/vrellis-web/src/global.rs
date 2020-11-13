@@ -1,38 +1,47 @@
-use image::{DynamicImage, GenericImageView};
-use serde::{Deserialize, Serialize};
-use std::fmt::{self, Debug, Formatter};
+use vrellis_core::{Vrellis, VrellisAlgorithm, VrellisColorMode, VrellisShape};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct GlobalSettings {
-    pub scene: Scene,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum Scene {
-    AsciiArt,
-    BrailleArt,
-    EmojiArt,
-}
-
-impl Debug for Scene {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Scene::AsciiArt => f.debug_tuple("AsciiArt").finish(),
-            Scene::BrailleArt => f.debug_tuple("BrailleArt").finish(),
-            Scene::EmojiArt => f.debug_tuple("EmojiArt").finish(),
-        }
-    }
+    pub steps: u32,
+    pub points: u32,
+    pub convex_shape: VrellisShape,
+    pub color_mode: VrellisColorMode,
+    pub anti_aliased: bool,
+    pub inverted_color: bool,
+    pub min_distance: u32,
+    pub line_width: f32,
 }
 
 impl Default for GlobalSettings {
     fn default() -> Self {
-        Self { scene: Scene::AsciiArt }
+        Self {
+            steps: 1000,
+            convex_shape: Default::default(),
+            points: 100,
+            color_mode: Default::default(),
+            anti_aliased: true,
+            inverted_color: false,
+            min_distance: 0,
+            line_width: 1.0,
+        }
     }
 }
 
-pub fn format_image_size(img: &Option<DynamicImage>) -> String {
-    match img {
-        Some(i) => format!("{}×{}", i.width(), i.height()),
-        None => String::from("0"),
+impl GlobalSettings {
+    pub fn build(&self) -> Vrellis {
+        let algorithm = match self.anti_aliased {
+            true => VrellisAlgorithm::AntiAliased,
+            false => VrellisAlgorithm::ThinLine,
+        };
+        Vrellis {
+            convex_shape: self.convex_shape.clone(),
+            points: self.points,
+            color_mode: self.color_mode,
+            algorithm,
+            inverted_color: false,
+            min_distance: self.min_distance,
+            line_width: self.line_width,
+            highlight_last_step: None,
+        }
     }
 }

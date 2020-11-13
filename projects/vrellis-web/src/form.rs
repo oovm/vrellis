@@ -1,7 +1,7 @@
 use crate::{Event, Model};
 use image::{imageops::FilterType, GenericImageView, ImageFormat, ImageOutputFormat};
-use yew::prelude::*;
 use vrellis_core::VrellisAlgorithm;
+use yew::prelude::*;
 
 impl Model {
     pub fn qr_code_view(&self) -> Html {
@@ -73,42 +73,21 @@ impl Model {
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2">{"Enhanced:"}</label>
+                <label class="col-sm-2">{"AntiAliased:"}</label>
                 <div class="col-sm-10">
                     <input type="checkbox"
                         checked=self.algorithm_view()
-                        onchange=self.link.callback(|input: ChangeData| Event::EnhanceMode(input))
+                        onchange=self.link.callback(|input: ChangeData| Event::AntiAliased(input))
                     />
                  </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2">{"Background:"}</label>
-                <div class="col-sm-10">
-                    <div class="form-control-static">
-                        <input type="color"
-                            onchange=self.link.callback(|input: ChangeData| Event::LightColor(input))
-                        />
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2">{"Foreground:"}</label>
-                <div class="col-sm-10">
-                    <div class="form-control-static">
-                        <input type="color"
-                            onchange=self.link.callback(|input: ChangeData| Event::DarkColor(input))
-                        />
-                    </div>
-                </div>
             </div>
         </form>
         }
     }
 }
 
-
 impl Model {
-    fn algorithm_view(&self)->bool {
+    fn algorithm_view(&self) -> bool {
         match self.state.algorithm {
             VrellisAlgorithm::NonRendered => false,
             VrellisAlgorithm::ThinLine => false,
