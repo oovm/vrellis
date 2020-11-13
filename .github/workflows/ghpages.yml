@@ -28,7 +28,7 @@ jobs:
           cargo install trunk
       - name: Build website 💣
         run: |
-          cd projects/mosaic-craft-web
+          cd projects/vrellis-web
           wasm-bindgen -V
           trunk -V
           trunk build --release
@@ -37,5 +37,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: projects/mosaic-craft-web/dist
+          FOLDER: projects/vrellis-web/dist
           CLEAN: true
