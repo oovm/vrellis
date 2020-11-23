@@ -28,8 +28,8 @@ pub struct Vrellis {
     pub min_distance: u32,
     /// The basic width of the line when drawing
     pub line_width: f32,
-    /// Whether to use highlight color to highlight the last step
-    pub highlight_last_step: Option<Rgb<u8>>,
+    /* Whether to use highlight color to highlight the last step
+     * pub highlight_last_step: Option<Rgb<u8>>, */
 }
 
 impl Default for Vrellis {
@@ -42,7 +42,6 @@ impl Default for Vrellis {
             points: 100,
             min_distance: 0,
             line_width: 1.0,
-            highlight_last_step: None,
         }
     }
 }

@@ -2,9 +2,9 @@
 
 mod global;
 use crate::global::GlobalSettings;
-use image::{load_from_memory_with_format, ImageFormat};
-use std::{num::ParseIntError, str::FromStr};
-use vrellis_core::{Vrellis, VrellisAlgorithm};
+use image::{load_from_memory_with_format, ImageFormat, DynamicImage};
+use std::str::FromStr;
+use vrellis_core::VrellisShape;
 use yew::{
     format::Json,
     html,
@@ -28,15 +28,18 @@ pub enum Event {
     AntiAliased(ChangeData),
     Files(ChangeData),
     FilesLoaded(FileData),
+    Refresh,
+    Play(ChangeData)
 }
 
-#[derive(Debug)]
 pub struct Model {
     link: ComponentLink<Self>,
     storage: StorageService,
     tasks: Vec<ReaderTask>,
-    image: Vec<u8>,
+    image: DynamicImage,
     state: GlobalSettings,
+    output: Vec<String>,
+    output_index: usize,
 }
 
 impl Component for Model {
@@ -49,46 +52,70 @@ impl Component for Model {
             Json(Ok(state)) => state,
             _ => GlobalSettings::default(),
         };
-        Self { link, storage, tasks: vec![], image: vec![], state }
+        let default = include_bytes!("github.png") as &[u8];
+        let image = load_from_memory_with_format(default, ImageFormat::Png).unwrap();
+        Self { link, storage, tasks: vec![], image, state, output: vec![], output_index: 0 }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Event::Points(ChangeData::Value(v)) => {
-                if let Ok(o) = u32::from_str(&v) {
-                    self.state.points = o
-                }
-            }
             Event::Steps(ChangeData::Value(v)) => {
                 if let Ok(o) = u32::from_str(&v) {
                     self.state.steps = o
                 }
+                self.storage.store(KEY, Json(&self.state));
+            }
+            Event::Points(ChangeData::Value(v)) => {
+                if let Ok(o) = u32::from_str(&v) {
+                    self.state.points = o
+                }
+                self.storage.store(KEY, Json(&self.state));
             }
             Event::LineWidth(ChangeData::Value(v)) => {
                 if let Ok(o) = f32::from_str(&v) {
                     self.state.line_width = o
                 }
+                self.storage.store(KEY, Json(&self.state));
             }
             Event::Shape(ChangeData::Select(s)) => {
-
-            },
-            Event::AntiAliased(_) => self.state.anti_aliased = !self.state.anti_aliased,
+                let shape = match s.value().as_ref() {
+                    "3" => VrellisShape::Triangle,
+                    "4" => VrellisShape::Square,
+                    _ => VrellisShape::Circle,
+                };
+                self.state.convex_shape = shape;
+                self.storage.store(KEY, Json(&self.state));
+            }
+            Event::AntiAliased(_) => {
+                self.state.anti_aliased = !self.state.anti_aliased;
+                self.storage.store(KEY, Json(&self.state));
+            }
             Event::Files(ChangeData::Files(f)) => {
                 let task = ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::FilesLoaded)).unwrap();
                 self.tasks.push(task)
             }
             Event::FilesLoaded(data) => {
-                let img = match load_from_memory_with_format(&data.content, ImageFormat::Png) {
-                    Ok(o) => o,
+                match load_from_memory_with_format(&data.content, ImageFormat::Png) {
+                    Ok(o) => { self.image = o },
                     Err(e) => {
                         DialogService::alert(&format!("{}", e));
                         return false;
                     }
                 };
             }
-            _ => (),
+            Event::Refresh => {
+                let ctx = self.state.build();
+                let mut state = ctx.render(self.image.clone());
+                state.steps(self.state.steps);
+                self.output = state.draw_svg_steps()
+            },
+            Event::Play(ChangeData::Value(v)) => {
+                if let Ok(o) = usize::from_str(&v) {
+                    self.output_index = o
+                }
+            }
+            _ => return false,
         }
-        self.storage.store(KEY, Json(&self.state));
         return true;
     }
 

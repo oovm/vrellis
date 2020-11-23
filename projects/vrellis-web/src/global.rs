@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use vrellis_core::{Vrellis, VrellisAlgorithm, VrellisColorMode, VrellisShape};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GlobalSettings {
     pub steps: u32,
     pub points: u32,
@@ -41,7 +42,6 @@ impl GlobalSettings {
             inverted_color: false,
             min_distance: self.min_distance,
             line_width: self.line_width,
-            highlight_last_step: None,
         }
     }
 }

@@ -1,13 +1,13 @@
 use crate::{Event, Model};
-use image::{imageops::FilterType, GenericImageView, ImageFormat, ImageOutputFormat};
-use vrellis_core::VrellisAlgorithm;
+
+use vrellis_core::VrellisShape;
 use yew::prelude::*;
 
 impl Model {
-    pub fn qr_code_view(&self) -> Html {
+    pub fn output_view(&self) -> Html {
         return html! {
         <div class="form-group">
-            <label class="col-sm-2">{"QR_CODE:"}</label>
+            <label class="col-sm-2">{"Output:"}</label>
             <div class="col-sm-10">{"qr"}</div>
         </div>
         };
@@ -16,16 +16,7 @@ impl Model {
     pub fn form_view(&self) -> Html {
         html! {
         <form class="form-horizontal">
-            {self.qr_code_view()}
-            <div class="form-group">
-                <label class="col-sm-2">{"Text:"}</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" rows="3"
-                        value="self.input"
-                        oninput=self.link.callback(|input: InputData| Event::Input(input.value))
-                    />
-                </div>
-            </div>
+            {self.output_view()}
             <div class="form-group">
                 <label class="col-sm-2">{"Image:"}</label>
                 <div class="col-sm-10">
@@ -35,40 +26,39 @@ impl Model {
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2">{"QR Version:"}</label>
+                <label class="col-sm-2">{"Iterations:"}</label>
                 <div class="col-sm-9">
                     <div class="form-control-static">
-                        <input type="range" min="1" max="10" step="1"
-                            value="self.format_qr_version()"
-                            onchange=self.link.callback(|input: ChangeData| Event::QRVersion(input))
+                        <input type="range" min="100" max="4000" step="100"
+                            value=self.state.steps
+                            onchange=self.link.callback(|input: ChangeData| Event::Steps(input))
                         />
                     </div>
                 </div>
-                <label class="col-sm-1">{"self.format_qr_version()"}</label>
+                <label class="col-sm-1">{self.state.steps}</label>
             </div>
             <div class="form-group">
-                <label class="col-sm-2">{"Output Size:"}</label>
+                <label class="col-sm-2">{"Points:"}</label>
                 <div class="col-sm-9">
                     <div class="form-control-static">
-                        <input type="range" min="80" max="640" step="20"
-                            value="self.output_size"
-                            onchange=self.link.callback(|input: ChangeData| Event::OutputSize(input))
+                        <input type="range" min="50" max="500" step="50"
+                            value=self.state.points
+                            onchange=self.link.callback(|input: ChangeData| Event::Points(input))
                         />
                     </div>
                 </div>
-                <label class="col-sm-1">{"self.output_size"}</label>
+                <label class="col-sm-1">{self.state.points}</label>
             </div>
             <div class="form-group">
-                <label class="col-sm-2">{"EC Level:"}</label>
+                <label class="col-sm-2">{"Shape:"}</label>
                 <div class="col-sm-10">
                     <select class="form-control"
-                        value="self.format_ec_level()"
-                        onchange=self.link.callback(|input: ChangeData| Event::ECLevel(input))
+                        value=self.shape_view()
+                        onchange=self.link.callback(|input: ChangeData| Event::Shape(input))
                     >
-                        <option value="L">{"L"}</option>
-                        <option value="Q">{"Q"}</option>
-                        <option value="M">{"M"}</option>
-                        <option value="H">{"H"}</option>
+                        <option value="3">{"Triangle"}</option>
+                        <option value="4">{"Square"}</option>
+                        <option value="0">{"Circle"}</option>
                     </select>
                 </div>
             </div>
@@ -76,7 +66,7 @@ impl Model {
                 <label class="col-sm-2">{"AntiAliased:"}</label>
                 <div class="col-sm-10">
                     <input type="checkbox"
-                        checked=self.algorithm_view()
+                        checked=self.state.anti_aliased
                         onchange=self.link.callback(|input: ChangeData| Event::AntiAliased(input))
                     />
                  </div>
@@ -87,11 +77,11 @@ impl Model {
 }
 
 impl Model {
-    fn algorithm_view(&self) -> bool {
-        match self.state.algorithm {
-            VrellisAlgorithm::NonRendered => false,
-            VrellisAlgorithm::ThinLine => false,
-            VrellisAlgorithm::AntiAliased => true,
+    fn shape_view(&self) -> u32 {
+        match self.state.convex_shape {
+            VrellisShape::Triangle => 3,
+            VrellisShape::Square => 4,
+            VrellisShape::Circle | _ => 0,
         }
     }
 }
