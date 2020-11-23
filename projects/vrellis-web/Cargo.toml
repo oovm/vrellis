@@ -1,10 +1,10 @@
 [package]
-name = "mosaic-craft-web"
+name = "vrellis-web"
 publish = false
 version = "1.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
-repository = "https://github.com/GalAster/ascii-art"
+repository = "https://github.com/GalAster/vrellis"
 readme = "../../readme.md"
 license = "MPL-2.0"
 edition = "2018"

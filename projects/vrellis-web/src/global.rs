@@ -23,7 +23,7 @@ impl Default for GlobalSettings {
             anti_aliased: true,
             inverted_color: false,
             min_distance: 0,
-            line_width: 1.0,
+            line_width: 0.25,
         }
     }
 }

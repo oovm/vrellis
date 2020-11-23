@@ -2,7 +2,7 @@
 
 mod global;
 use crate::global::GlobalSettings;
-use image::{load_from_memory_with_format, ImageFormat, DynamicImage};
+use image::{load_from_memory_with_format, DynamicImage, ImageFormat};
 use std::str::FromStr;
 use vrellis_core::VrellisShape;
 use yew::{
@@ -29,7 +29,7 @@ pub enum Event {
     Files(ChangeData),
     FilesLoaded(FileData),
     Refresh,
-    Play(ChangeData)
+    Play(ChangeData),
 }
 
 pub struct Model {
@@ -96,7 +96,7 @@ impl Component for Model {
             }
             Event::FilesLoaded(data) => {
                 match load_from_memory_with_format(&data.content, ImageFormat::Png) {
-                    Ok(o) => { self.image = o },
+                    Ok(o) => self.image = o,
                     Err(e) => {
                         DialogService::alert(&format!("{}", e));
                         return false;
@@ -107,8 +107,9 @@ impl Component for Model {
                 let ctx = self.state.build();
                 let mut state = ctx.render(self.image.clone());
                 state.steps(self.state.steps);
-                self.output = state.draw_svg_steps()
-            },
+                self.output = state.draw_svg_steps();
+                self.output_index = self.output.len()-1
+            }
             Event::Play(ChangeData::Value(v)) => {
                 if let Ok(o) = usize::from_str(&v) {
                     self.output_index = o
@@ -127,10 +128,10 @@ impl Component for Model {
         html! {
         <main class="container-fluid">
             <div class="page-header">
-                <h1>{"QR Image Embed"}</h1>
+                <h1>{"Vrellis String Art"}</h1>
                 <span>
                 <iframe
-                    src="https://ghbtns.com/github-btn.html?user=GalAster&repo=qr-image&type=star&count=true&size=large"
+                    src="https://ghbtns.com/github-btn.html?user=GalAster&repo=vrellis&type=star&count=true&size=large"
                     frameborder="0" scrolling="0" width="170" height="30" title="GitHub" loading="lazy"
                 />
                 </span>

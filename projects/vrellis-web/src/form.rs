@@ -5,12 +5,38 @@ use yew::prelude::*;
 
 impl Model {
     pub fn output_view(&self) -> Html {
-        return html! {
+        if self.output.is_empty() {
+            return self.empty_output_view()
+        }
+        let t = yew::utils::document().create_element("div").unwrap();
+        match self.output.get(self.output_index) {
+            None => {
+                
+                return self.empty_output_view()
+            }
+            Some(s) => {
+                t.set_inner_html(s)
+            }
+        }
+        let out = Html::VRef(t.first_child().unwrap().into());
+        html! {<>
         <div class="form-group">
             <label class="col-sm-2">{"Output:"}</label>
-            <div class="col-sm-10">{"qr"}</div>
+            <div class="col-sm-10">{out}</div>
         </div>
-        };
+        <div class="form-group">
+            <label class="col-sm-2">{"Steps:"}</label>
+            <div class="col-sm-9">
+                <div class="form-control-static">
+                    <input type="range" min=0 max=self.output.len()-1 step=1
+                        value=self.output_index
+                        onchange=self.link.callback(|input: ChangeData| Event::Play(input))
+                    />
+                </div>
+            </div>
+            <label class="col-sm-1">{self.output_index}</label>
+        </div>
+        </>}
     }
 
     pub fn form_view(&self) -> Html {
@@ -19,11 +45,14 @@ impl Model {
             {self.output_view()}
             <div class="form-group">
                 <label class="col-sm-2">{"Image:"}</label>
-                <div class="col-sm-10">
+                <div class="col-sm-8">
                     <input type="file" multiple=true
                         onchange=self.link.callback(|input: ChangeData| Event::Files(input))
                     />
                 </div>
+                <button class="col-sm-2 btn btn-primary" type="button"
+                    onclick=self.link.callback(|_| Event::Refresh)
+                >{"Render!"}</button>
             </div>
             <div class="form-group">
                 <label class="col-sm-2">{"Iterations:"}</label>
@@ -82,6 +111,14 @@ impl Model {
             VrellisShape::Triangle => 3,
             VrellisShape::Square => 4,
             VrellisShape::Circle | _ => 0,
+        }
+    }
+    fn empty_output_view(&self) -> Html {
+        html! {
+        <div class="form-group">
+            <label class="col-sm-2">{"Output:"}</label>
+            <div class="col-sm-10"></div>
+        </div>
         }
     }
 }

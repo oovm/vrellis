@@ -32,6 +32,7 @@ impl Vrellis {
             path: vec![initial_point.n],
             path_banned: Default::default(),
             last_point: initial_point.clone(),
+            line_width: self.line_width
         }
     }
 }

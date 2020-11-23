@@ -20,6 +20,7 @@ pub struct VrellisCanvas {
     pub path: Vec<u32>,
     pub path_banned: HashSet<(u32, u32)>,
     pub last_point: VrellisPoint,
+    pub line_width: f32,
 }
 
 impl Debug for VrellisCanvas {
