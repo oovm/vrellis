@@ -1,6 +1,7 @@
 use crate::{Result, Vrellis, VrellisCanvas, VrellisPoint};
 use image::{io::Reader, DynamicImage, GenericImageView, GrayImage, Luma};
 use std::{io::Cursor, path::Path};
+use image::imageops::FilterType;
 
 impl Vrellis {
     pub fn render_path(&self, path: impl AsRef<Path>) -> Result<VrellisCanvas> {
@@ -12,6 +13,7 @@ impl Vrellis {
         Ok(self.render(img))
     }
     pub fn render(&self, img: DynamicImage) -> VrellisCanvas {
+        let img = img.resize_exact(1000,1000,FilterType::Triangle);
         let canvas = match self.inverted_color {
             true => DynamicImage::new_luma_a8(img.width(), img.height()),
             false => DynamicImage::new_luma_a8(img.width(), img.height()),

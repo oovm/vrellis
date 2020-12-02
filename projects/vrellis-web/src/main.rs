@@ -52,7 +52,7 @@ impl Component for Model {
             Json(Ok(state)) => state,
             _ => GlobalSettings::default(),
         };
-        let default = include_bytes!("monroe.png") as &[u8];
+        let default = include_bytes!("github.png") as &[u8];
         let image = load_from_memory_with_format(default, ImageFormat::Png).unwrap();
         Self { link, storage, tasks: vec![], image, state, output: vec![], output_index: 0 }
     }
