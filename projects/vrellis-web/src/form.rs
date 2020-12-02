@@ -5,11 +5,11 @@ use yew::prelude::*;
 
 impl Model {
     pub fn output_view(&self) -> Html {
-        if self.output.is_empty() {
+        if self.output_svgs.is_empty() {
             return self.empty_output_view();
         }
         let t = yew::utils::document().create_element("div").unwrap();
-        match self.output.get(self.output_index) {
+        match self.output_svgs.get(self.output_index) {
             None => return self.empty_output_view(),
             Some(s) => t.set_inner_html(s),
         }
@@ -23,7 +23,7 @@ impl Model {
             <label class="col-sm-2">{"Steps:"}</label>
             <div class="col-sm-9">
                 <div class="form-control-static">
-                    <input type="range" min=0 max=self.output.len()-1 step=1
+                    <input type="range" min=0 max=self.output_svgs.len()-1 step=1
                         value=self.output_index
                         onchange=self.link.callback(|input: ChangeData| Event::Play(input))
                     />
@@ -72,6 +72,18 @@ impl Model {
                     </div>
                 </div>
                 <label class="col-sm-1">{self.state.points}</label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2">{"Line Width:"}</label>
+                <div class="col-sm-9">
+                    <div class="form-control-static">
+                        <input type="range" min="0.05" max="1" step="0.05"
+                            value=self.state.line_width
+                            onchange=self.link.callback(|input: ChangeData| Event::LineWidth(input))
+                        />
+                    </div>
+                </div>
+                <label class="col-sm-1">{self.state.line_width}</label>
             </div>
             <div class="form-group">
                 <label class="col-sm-2">{"Shape:"}</label>

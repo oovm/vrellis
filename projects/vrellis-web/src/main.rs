@@ -4,7 +4,7 @@ mod global;
 use crate::global::GlobalSettings;
 use image::{load_from_memory_with_format, DynamicImage, ImageFormat};
 use std::str::FromStr;
-use vrellis_core::VrellisShape;
+use vrellis_core::{VrellisCanvas, VrellisShape};
 use yew::{
     format::Json,
     html,
@@ -38,7 +38,8 @@ pub struct Model {
     tasks: Vec<ReaderTask>,
     image: DynamicImage,
     state: GlobalSettings,
-    output: Vec<String>,
+    output: Option<VrellisCanvas>,
+    output_svgs: Vec<String>,
     output_index: usize,
 }
 
@@ -52,9 +53,9 @@ impl Component for Model {
             Json(Ok(state)) => state,
             _ => GlobalSettings::default(),
         };
-        let default = include_bytes!("github.png") as &[u8];
+        let default = include_bytes!("Mona Lisa.png") as &[u8];
         let image = load_from_memory_with_format(default, ImageFormat::Png).unwrap();
-        Self { link, storage, tasks: vec![], image, state, output: vec![], output_index: 0 }
+        Self { link, storage, tasks: vec![], image, state, output: None, output_svgs: vec![], output_index: 0 }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -76,6 +77,10 @@ impl Component for Model {
                     self.state.line_width = o
                 }
                 self.storage.store(KEY, Json(&self.state));
+                if let Some(s) = &mut self.output {
+                    s.line_width = self.state.line_width;
+                    self.output_svgs = s.draw_svg_steps()
+                }
             }
             Event::Shape(ChangeData::Select(s)) => {
                 let shape = match s.value().as_ref() {
@@ -107,8 +112,9 @@ impl Component for Model {
                 let ctx = self.state.build();
                 let mut state = ctx.render(self.image.clone());
                 state.steps(self.state.steps);
-                self.output = state.draw_svg_steps();
-                self.output_index = self.output.len() - 1
+                self.output = Some(state);
+                self.output_svgs = self.output.as_ref().unwrap().draw_svg_steps();
+                self.output_index = self.output_svgs.len() - 1
             }
             Event::Play(ChangeData::Value(v)) => {
                 if let Ok(o) = usize::from_str(&v) {

@@ -18,12 +18,12 @@ impl Default for GlobalSettings {
         Self {
             steps: 1000,
             convex_shape: Default::default(),
-            points: 100,
+            points: 200,
             color_mode: Default::default(),
             anti_aliased: true,
             inverted_color: false,
             min_distance: 0,
-            line_width: 0.25,
+            line_width: 0.5,
         }
     }
 }
