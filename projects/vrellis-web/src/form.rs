@@ -6,17 +6,12 @@ use yew::prelude::*;
 impl Model {
     pub fn output_view(&self) -> Html {
         if self.output.is_empty() {
-            return self.empty_output_view()
+            return self.empty_output_view();
         }
         let t = yew::utils::document().create_element("div").unwrap();
         match self.output.get(self.output_index) {
-            None => {
-                
-                return self.empty_output_view()
-            }
-            Some(s) => {
-                t.set_inner_html(s)
-            }
+            None => return self.empty_output_view(),
+            Some(s) => t.set_inner_html(s),
         }
         let out = Html::VRef(t.first_child().unwrap().into());
         html! {<>

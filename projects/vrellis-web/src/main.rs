@@ -52,7 +52,7 @@ impl Component for Model {
             Json(Ok(state)) => state,
             _ => GlobalSettings::default(),
         };
-        let default = include_bytes!("github.png") as &[u8];
+        let default = include_bytes!("monroe.png") as &[u8];
         let image = load_from_memory_with_format(default, ImageFormat::Png).unwrap();
         Self { link, storage, tasks: vec![], image, state, output: vec![], output_index: 0 }
     }
@@ -108,7 +108,7 @@ impl Component for Model {
                 let mut state = ctx.render(self.image.clone());
                 state.steps(self.state.steps);
                 self.output = state.draw_svg_steps();
-                self.output_index = self.output.len()-1
+                self.output_index = self.output.len() - 1
             }
             Event::Play(ChangeData::Value(v)) => {
                 if let Ok(o) = usize::from_str(&v) {

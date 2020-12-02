@@ -56,6 +56,7 @@ impl VrellisAlgorithm {
     }
 }
 
+#[allow(dead_code)]
 impl VrellisCanvas {
     pub(in crate::render) fn draw_canvas_line(&mut self, x1: u32, x2: u32, y1: u32, y2: u32, reversed: bool) {
         let pixel = match reversed {

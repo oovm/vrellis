@@ -22,7 +22,11 @@ impl VrellisCanvas {
                 r#"<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {} {}">{}</svg>"#,
                 self.current_image.width(),
                 self.current_image.height(),
-                format!(r#"<polyline points={:?} style="fill:none;stroke:black;stroke-width:1"/>"#, self.take_points(i))
+                format!(
+                    r#"<polyline points={:?} style="fill:none;stroke:black;stroke-width:{}"/>"#,
+                    self.take_points(i),
+                    self.line_width
+                )
             ))
         }
         return out;

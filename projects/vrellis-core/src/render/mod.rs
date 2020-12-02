@@ -1,9 +1,7 @@
 mod draw_line;
-mod sequence;
 mod solver;
 
 pub use draw_line::VrellisAlgorithm;
-pub use sequence::VrellisSequence;
 use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, f32::consts::PI};
 

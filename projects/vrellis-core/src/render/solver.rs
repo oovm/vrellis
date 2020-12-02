@@ -1,5 +1,5 @@
 use crate::{Result, Vrellis, VrellisCanvas, VrellisPoint};
-use image::{io::Reader, DynamicImage, GenericImageView};
+use image::{io::Reader, DynamicImage, GenericImageView, GrayImage, Luma};
 use std::{io::Cursor, path::Path};
 
 impl Vrellis {
@@ -21,18 +21,20 @@ impl Vrellis {
             true => points_sample.iter().min_by_key(|p| p.n).unwrap(),
             false => points_sample.iter().min_by_key(|p| p.n).unwrap(),
         };
+        let mut current_composite_image = img.to_luma();
+        quantify_color( &mut current_composite_image);
         VrellisCanvas {
             algorithm: self.algorithm,
             min_distance: self.min_distance,
             inverted_color: self.inverted_color,
             target_image: img.to_rgb(),
             current_image: canvas.to_luma_alpha(),
-            current_composite_image: img.to_luma(),
+            current_composite_image,
             points: points_sample.clone(),
             path: vec![initial_point.n],
             path_banned: Default::default(),
             last_point: initial_point.clone(),
-            line_width: self.line_width
+            line_width: self.line_width,
         }
     }
 }
@@ -103,4 +105,26 @@ impl VrellisCanvas {
             false
         }
     }
+}
+
+pub fn quantify_color(img: &mut GrayImage) {
+    for p in img.pixels_mut() {
+        unsafe { nearest_color(p) }
+    }
+}
+
+pub unsafe fn nearest_color(pixel: &mut Luma<u8>) {
+    let colors = &[0u8,64, 128,192, 255];
+    let pixel = pixel.0.get_unchecked_mut(0);
+    let raw = *pixel;
+    let mut min_delta = 255;
+    for &item in colors.iter().rev() {
+        let mid = if raw >= item { raw - item } else { item - raw };
+        if mid < min_delta {
+           // print!("{} ", mid);
+            min_delta = mid;
+            *pixel = item
+        }
+    }
+    //println!()
 }
